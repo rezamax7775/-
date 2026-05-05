@@ -49,6 +49,39 @@ async function startServer() {
     }
   });
 
+  // API User Management
+  app.get('/api/users', async (req, res) => {
+    const users = JSON.parse(await fs.readFile(USERS_FILE, 'utf-8'));
+    // پسوردها را در لیست ارسالی حذف می‌کنیم برای امنیت
+    const safeUsers = users.map(({ password, ...u }: any) => u);
+    res.json(safeUsers);
+  });
+
+  app.post('/api/users', async (req, res) => {
+    const newUser = req.body;
+    const users = JSON.parse(await fs.readFile(USERS_FILE, 'utf-8'));
+    
+    if (users.find((u: any) => u.username === newUser.username)) {
+      return res.status(400).json({ success: false, message: 'این نام کاربری قبلاً انتخاب شده است' });
+    }
+
+    users.push(newUser);
+    await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+    res.json({ success: true });
+  });
+
+  app.delete('/api/users/:username', async (req, res) => {
+    const { username } = req.params;
+    if (username === 'admin') {
+      return res.status(400).json({ success: false, message: 'حذف کاربر مدیر اصلی امکان‌پذیر نیست' });
+    }
+    
+    let users = JSON.parse(await fs.readFile(USERS_FILE, 'utf-8'));
+    users = users.filter((u: any) => u.username !== username);
+    await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+    res.json({ success: true });
+  });
+
   // API Routes
   app.get('/api/customers', async (req, res) => {
     const data = await fs.readFile(DB_FILE, 'utf-8');

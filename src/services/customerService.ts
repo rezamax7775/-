@@ -1,11 +1,32 @@
-import { Customer, SubscriptionType, SUBSCRIPTION_PLANS } from '../types';
+import { Customer, SubscriptionType, SUBSCRIPTION_PLANS, AppUser } from '../types';
 
 export class CustomerService {
-  static async login(username: string, password: string): Promise<{ success: boolean; user?: any; message?: string }> {
+  static async login(username: string, password: string): Promise<{ success: boolean; user?: AppUser; message?: string }> {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
+    });
+    return res.json();
+  }
+
+  static async getUsers(): Promise<AppUser[]> {
+    const res = await fetch('/api/users');
+    return res.json();
+  }
+
+  static async createUser(user: AppUser): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    });
+    return res.json();
+  }
+
+  static async deleteUser(username: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`/api/users/${username}`, {
+      method: 'DELETE'
     });
     return res.json();
   }

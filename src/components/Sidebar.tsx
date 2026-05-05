@@ -1,10 +1,10 @@
 import React from 'react';
-import { LayoutDashboard, Users, UserPlus, Download, Upload, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Download, Upload, LogOut, ShieldCheck } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SidebarProps {
-  activeTab: 'dashboard' | 'customers' | 'add';
-  setActiveTab: (tab: 'dashboard' | 'customers' | 'add') => void;
+  activeTab: 'dashboard' | 'customers' | 'add' | 'settings';
+  setActiveTab: (tab: 'dashboard' | 'customers' | 'add' | 'settings') => void;
   onExport: () => void;
   onImport: () => void;
   onLogout: () => void;
@@ -15,6 +15,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onExp
     { id: 'dashboard', label: 'داشبورد', icon: LayoutDashboard },
     { id: 'customers', label: 'لیست مشترکین', icon: Users },
     { id: 'add', label: 'ثبت مشترک جدید', icon: UserPlus },
+    { id: 'settings', label: 'مدیریت کاربران', icon: ShieldCheck },
   ] as const;
 
   return (

@@ -26,3 +26,9 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   { id: '6-month', label: '۶ ماهه', months: 6 },
   { id: '1-year', label: 'یک ساله', months: 12 },
 ];
+
+export interface AppUser {
+  username: string;
+  name: string;
+  password?: string;
+}

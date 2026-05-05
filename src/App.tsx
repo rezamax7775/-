@@ -9,17 +9,18 @@ import { Dashboard } from './components/Dashboard';
 import { CustomerTable } from './components/CustomerTable';
 import { CustomerForm } from './components/CustomerForm';
 import { Login } from './components/Login';
+import { UserManagement } from './components/UserManagement';
 import { CustomerService } from './services/customerService';
-import { Customer } from './types';
+import { Customer, AppUser } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 import Papa from 'papaparse';
 
 export default function App() {
-  const [user, setUser] = useState<any>(() => {
+  const [user, setUser] = useState<AppUser | null>(() => {
     const saved = localStorage.getItem('crm_user');
     return saved ? JSON.parse(saved) : null;
   });
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'add'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'add' | 'settings'>('dashboard');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
@@ -29,7 +30,7 @@ export default function App() {
     }
   }, [user]);
 
-  const handleLogin = (userData: any) => {
+  const handleLogin = (userData: AppUser) => {
     setUser(userData);
     localStorage.setItem('crm_user', JSON.stringify(userData));
   };
@@ -184,6 +185,18 @@ export default function App() {
                   setActiveTab('dashboard');
                 }}
               />
+            </motion.div>
+          )}
+
+          {activeTab === 'settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <UserManagement />
             </motion.div>
           )}
         </AnimatePresence>
