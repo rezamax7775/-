@@ -8,19 +8,36 @@ import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { CustomerTable } from './components/CustomerTable';
 import { CustomerForm } from './components/CustomerForm';
+import { Login } from './components/Login';
 import { CustomerService } from './services/customerService';
 import { Customer } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 import Papa from 'papaparse';
 
 export default function App() {
+  const [user, setUser] = useState<any>(() => {
+    const saved = localStorage.getItem('crm_user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'add'>('dashboard');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
   useEffect(() => {
-    CustomerService.getCustomers().then(setCustomers).catch(console.error);
-  }, []);
+    if (user) {
+      CustomerService.getCustomers().then(setCustomers).catch(console.error);
+    }
+  }, [user]);
+
+  const handleLogin = (userData: any) => {
+    setUser(userData);
+    localStorage.setItem('crm_user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('crm_user');
+  };
 
   const handleAddCustomer = async (data: any) => {
     try {
@@ -102,6 +119,10 @@ export default function App() {
     input.click();
   };
 
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="flex bg-[#F8F9FA] min-h-screen text-gray-900 overflow-x-hidden" dir="rtl">
       <Sidebar 
@@ -109,6 +130,7 @@ export default function App() {
         setActiveTab={setActiveTab} 
         onExport={handleExport}
         onImport={handleImport}
+        onLogout={handleLogout}
       />
       
       <main className="flex-1 p-8 max-w-6xl mx-auto w-full">

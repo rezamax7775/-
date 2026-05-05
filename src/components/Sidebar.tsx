@@ -7,9 +7,10 @@ interface SidebarProps {
   setActiveTab: (tab: 'dashboard' | 'customers' | 'add') => void;
   onExport: () => void;
   onImport: () => void;
+  onLogout: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onExport, onImport }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onExport, onImport, onLogout }) => {
   const menuItems = [
     { id: 'dashboard', label: 'داشبورد', icon: LayoutDashboard },
     { id: 'customers', label: 'لیست مشترکین', icon: Users },
@@ -57,6 +58,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onExp
         >
           <Upload size={16} />
           وارد کردن اطلاعات
+        </button>
+        <button 
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:text-red-300 transition-colors mt-4"
+        >
+          <LogOut size={16} />
+          خروج از سیستم
         </button>
       </div>
     </div>

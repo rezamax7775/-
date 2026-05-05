@@ -8,12 +8,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DB_FILE = path.join(__dirname, 'customers.json');
+const USERS_FILE = path.join(__dirname, 'users.json');
 
 async function ensureDb() {
   try {
     await fs.access(DB_FILE);
   } catch {
     await fs.writeFile(DB_FILE, JSON.stringify([]));
+  }
+  
+  try {
+    await fs.access(USERS_FILE);
+  } catch {
+    // ایجاد کاربر مدیر پیش‌فرض: admin / admin123
+    await fs.writeFile(USERS_FILE, JSON.stringify([{
+      username: 'admin',
+      password: '123',
+      name: 'مدیر سیستم'
+    }]));
   }
 }
 
@@ -23,6 +35,19 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // API Login
+  app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    const users = JSON.parse(await fs.readFile(USERS_FILE, 'utf-8'));
+    const user = users.find((u: any) => u.username === username && u.password === password);
+    
+    if (user) {
+      res.json({ success: true, user: { username: user.username, name: user.name } });
+    } else {
+      res.status(401).json({ success: false, message: 'نام کاربری یا رمز عبور اشتباه است' });
+    }
+  });
 
   // API Routes
   app.get('/api/customers', async (req, res) => {
