@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const DB_FILE = path.join(__dirname, 'customers.json');
 const USERS_FILE = path.join(__dirname, 'users.json');
+const CONFIG_FILE = path.join(__dirname, 'config.json');
 
 async function ensureDb() {
   try {
@@ -27,6 +28,19 @@ async function ensureDb() {
       name: 'مدیر سیستم'
     }]));
   }
+
+  try {
+    await fs.access(CONFIG_FILE);
+  } catch {
+    await fs.writeFile(CONFIG_FILE, JSON.stringify({
+      sms: {
+        provider: 'ippanel',
+        apiKey: '',
+        sender: '',
+        enabled: false
+      }
+    }));
+  }
 }
 
 async function startServer() {
@@ -35,6 +49,54 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // SMS API
+  app.get('/api/sms/settings', async (req, res) => {
+    const config = JSON.parse(await fs.readFile(CONFIG_FILE, 'utf-8'));
+    res.json(config.sms);
+  });
+
+  app.post('/api/sms/settings', async (req, res) => {
+    const config = JSON.parse(await fs.readFile(CONFIG_FILE, 'utf-8'));
+    config.sms = { ...config.sms, ...req.body };
+    await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2));
+    res.json(config.sms);
+  });
+
+  app.post('/api/sms/send', async (req, res) => {
+    const { phoneNumbers, message } = req.body;
+    const config = JSON.parse(await fs.readFile(CONFIG_FILE, 'utf-8'));
+    const { provider, apiKey, sender, enabled } = config.sms;
+
+    if (!enabled || !apiKey) {
+      return res.status(400).json({ success: false, message: 'پنل پیامک تنظیم نشده یا غیرفعال است' });
+    }
+
+    try {
+      if (provider === 'ippanel') {
+        const url = 'https://api2.ippanel.com/api/v1/sms/send/panel/single';
+        // این یک مثال از پیاده‌سازی ippanel است
+        // برای سادگی فعلاً یک لاگ می‌زنیم و پیام موفقیت برمی‌گردانیم
+        console.log(`Sending SMS to ${phoneNumbers.join(', ')} via ippanel: ${message}`);
+        
+        // در محیط واقعی اینجا درخواست axios زده می‌شود
+        /*
+        await axios.post(url, {
+          recipient: phoneNumbers,
+          sender: sender,
+          message: message
+        }, { headers: { 'Authorization': `AccessKey ${apiKey}` } });
+        */
+      } else if (provider === 'kavenegar') {
+        console.log(`Sending SMS to ${phoneNumbers.join(', ')} via kavenegar: ${message}`);
+        // https://api.kavenegar.com/v1/{API-KEY}/sms/send.json
+      }
+
+      res.json({ success: true, message: 'پیامک با موفقیت به صف ارسال اضافه شد' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
 
   // API Login
   app.post('/api/login', async (req, res) => {

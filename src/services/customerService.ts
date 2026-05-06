@@ -37,6 +37,29 @@ export class CustomerService {
     return res.json();
   }
 
+  static async getSmsSettings(): Promise<any> {
+    const res = await fetch('/api/sms/settings');
+    return res.json();
+  }
+
+  static async saveSmsSettings(settings: any): Promise<any> {
+    const res = await fetch('/api/sms/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings)
+    });
+    return res.json();
+  }
+
+  static async sendSms(phoneNumbers: string[], message: string): Promise<{ success: boolean; message: string }> {
+    const res = await fetch('/api/sms/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phoneNumbers, message })
+    });
+    return res.json();
+  }
+
   static async addCustomer(customer: Omit<Customer, 'id' | 'createdAt' | 'expirationDate'>): Promise<Customer> {
     // Calculate expiration date
     const plan = SUBSCRIPTION_PLANS.find(p => p.id === customer.subscriptionType);

@@ -10,6 +10,7 @@ import { CustomerTable } from './components/CustomerTable';
 import { CustomerForm } from './components/CustomerForm';
 import { Login } from './components/Login';
 import { UserManagement } from './components/UserManagement';
+import { SmsMarketing } from './components/SmsMarketing';
 import { CustomerService } from './services/customerService';
 import { Customer, AppUser } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -20,7 +21,7 @@ export default function App() {
     const saved = localStorage.getItem('crm_user');
     return saved ? JSON.parse(saved) : null;
   });
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'add' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'add' | 'settings' | 'marketing'>('dashboard');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
@@ -197,6 +198,18 @@ export default function App() {
               transition={{ duration: 0.2 }}
             >
               <UserManagement />
+            </motion.div>
+          )}
+
+          {activeTab === 'marketing' && (
+            <motion.div
+              key="marketing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <SmsMarketing customers={customers} />
             </motion.div>
           )}
         </AnimatePresence>
